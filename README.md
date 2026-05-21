@@ -286,13 +286,13 @@ insufficient here?
 Describe a realistic alternative: for which relationship would `ON DELETE
 CASCADE` be appropriate instead, and why?
 
-> *Your answer:*  A realistic alternative would be ON DELETE CASCADE between exemplar and ausleihe. If a copy is permanently removed from the library, all historical loans related to this copy could automatically be deleted as well.
+> *Your answer:*  ON DELETE CASCADE would be appropriate between buch and exemplar, because if a book is removed from the system, all physical copies (exemplar) belonging to it no longer have meaning and can be safely deleted.
 
 **Question 2.3:** `email` is declared `UNIQUE`. According to the SQL standard,
 how many `NULL` values may a `UNIQUE` column contain? Explain using the
 three-valued logic of SQL.
 
-> *Your answer:*  According to the SQL standard, a UNIQUE column may contain multiple NULL values because NULL means “unknown.” In SQL’s three-valued logic, NULL is not considered equal to another NULL.
+> *Your answer:*  A UNIQUE constraint allows multiple NULL values because NULL is not considered equal to another NULL. In SQL’s three-valued logic, comparisons involving NULL result in UNKNOWN, therefore they do not violate uniqueness.
 
 ---
 
