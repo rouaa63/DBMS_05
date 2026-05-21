@@ -51,7 +51,8 @@ git --version
 > **Screenshot 1:** Take a screenshot of your terminal showing both
 > successful version checks and insert it here.
 >
-> `[insert screenshot]`
+> <img width="1293" height="100" alt="لقطة شاشة 2026-05-21 215622" src="https://github.com/user-attachments/assets/61f3895f-da5d-435f-8322-cfab236e5007" />
+
 
 ---
 
