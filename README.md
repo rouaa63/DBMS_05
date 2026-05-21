@@ -134,19 +134,19 @@ for each temporal attribute.
 example — using arithmetic — of why `REAL` would produce an incorrect result
 for a lending fee calculation. Which type must be used instead?
 
-> *Your answer:*
+> *Your answer:*  REAL uses floating-point arithmetic, which can produce rounding errors. For example, 0.1 + 0.2 may result in 0.30000000000000004 instead of exactly 0.30. This is unacceptable for monetary values such as daily loan fees. Therefore, NUMERIC(p,s) should be used because it stores decimal values with exact precision.
 
 **Question 1.2:** `rueckgabe_datum` must be nullable. Explain what `NULL` means
 in this specific context. Is `NULL` the same as "zero days"? Justify with
 reference to the three-valued logic of SQL.
 
-> *Your answer:*
+> *Your answer:*   NULL in rueckgabe_datum means that the return date is currently unknown because the book has not yet been returned. This is not the same as “zero days.” In SQL’s three-valued logic, NULL represents an unknown value, not a numeric value.
 
 **Question 1.3:** `beitritt_datum` should default to today's date when no value
 is provided. Write the `DEFAULT` expression you would use and explain why this
 is preferable to always supplying the date explicitly in the application.
 
-> *Your answer:*
+> *Your answer:*  DEFAULT CURRENT_DATE should be used. This automatically inserts the current date if no value is provided. It is preferable because it prevents missing membership dates and ensures consistent data entry.
 
 ---
 
@@ -280,19 +280,19 @@ INSERT INTO ausleihe VALUES (1, 1, 1, '2026-05-10', '2026-05-01');
 constraint rather than a column constraint. Why is a column constraint
 insufficient here?
 
-> *Your answer:*
+> *Your answer:*  The CHECK constraint on rueckgabe_datum must be a table constraint because it compares two columns: rueckgabe_datum and ausleihe_datum. A column constraint can only validate the value of a single column.
 
 **Question 2.2:** You chose `ON DELETE RESTRICT` for all foreign keys.
 Describe a realistic alternative: for which relationship would `ON DELETE
 CASCADE` be appropriate instead, and why?
 
-> *Your answer:*
+> *Your answer:*  A realistic alternative would be ON DELETE CASCADE between exemplar and ausleihe. If a copy is permanently removed from the library, all historical loans related to this copy could automatically be deleted as well.
 
 **Question 2.3:** `email` is declared `UNIQUE`. According to the SQL standard,
 how many `NULL` values may a `UNIQUE` column contain? Explain using the
 three-valued logic of SQL.
 
-> *Your answer:*
+> *Your answer:*  According to the SQL standard, a UNIQUE column may contain multiple NULL values because NULL means “unknown.” In SQL’s three-valued logic, NULL is not considered equal to another NULL.
 
 ---
 
@@ -410,21 +410,27 @@ works because all affected rows are in the same table. Why can a standard SQL
 `UPDATE` not update rows in two different tables simultaneously, and what would
 you use instead in a production system?
 
-> *Your answer:*
+> *Your answer:*  A standard SQL UPDATE statement can only modify rows in one table at a time. To update multiple tables consistently in a production system, transactions or stored procedures are typically used.
 
 **Question 3.2:** Task 3b.3 raises the fee for books published before 1960
 by 10 cents. Write the equivalent statement using `NUMERIC` arithmetic:
 `tagesgebuehr = tagesgebuehr + 0.10`. Would the same statement work correctly
 with `REAL`? Explain the risk.
 
-> *Your answer:*
+> *Your answer:*  The statement would be:
+
+UPDATE buch
+SET tagesgebuehr = tagesgebuehr + 0.10
+WHERE erscheinungsjahr < 1960;
+
+Using REAL would be risky because floating-point arithmetic can introduce rounding errors in monetary calculations.
 
 **Question 3.3:** Task 3c.1 deletes loans where the return date is more than
 30 days ago. A `DELETE` without a `WHERE` clause would delete all loans.
 Describe the operational consequence and explain how `BEGIN` / `ROLLBACK`
 protects against this mistake.
 
-> *Your answer:*
+> *Your answer:*  A DELETE statement without a WHERE clause would remove all rows from the table. This could destroy all loan history. BEGIN and ROLLBACK protect against this mistake because changes can be undone before they are committed permanently.
 
 ---
 
@@ -485,14 +491,14 @@ ALTER TABLE exemplar
 nullable column. Why is this simpler than adding a `NOT NULL` column to an
 already-populated table? What steps would be needed for a `NOT NULL` column?
 
-> *Your answer:*
+> *Your answer:*  Adding a nullable column is simple because existing rows automatically receive NULL values. Adding a NOT NULL column would require either a DEFAULT value or updating all existing rows before the constraint could be enforced.
 
 **Question 4.2:** SQLite's limited `ALTER TABLE` support is a deliberate
 design decision. What does this tell you about the trade-off between a
 lightweight embedded database and a full-featured server database system?
 Name one scenario where SQLite is the right choice and one where it is not.
 
-> *Your answer:*
+> *Your answer:*  SQLite prioritizes simplicity and low resource usage over advanced schema modification features. It is a good choice for embedded systems, mobile apps, and small local applications. It is less suitable for large enterprise systems with complex concurrent schema changes.
 
 Commit:
 
@@ -580,20 +586,25 @@ SELECT COUNT(*) FROM ausleihe WHERE ausleihe_id = 6;
 availability check and the insert happen inside the same transaction?
 What could go wrong if they ran as separate Autocommit statements?
 
-> *Your answer:*
+> *Your answer:*  The availability check and the INSERT must happen in the same transaction to avoid race conditions. If they ran as separate autocommit statements, another transaction could insert a loan for the same copy between the check and the insert.
 
 **Question 5.2:** The lecture states: "Ein fehlendes `WHERE` aktualisiert
 alle Zeilen." Write the single most dangerous `UPDATE` statement possible
 on this database and explain the damage it would cause. Then explain how
 `BEGIN` / `ROLLBACK` would allow you to recover.
 
-> *Your answer:*
+> *Your answer:*  A very dangerous statement would be:
+
+UPDATE buch
+SET tagesgebuehr = 0;
+
+Without a WHERE clause, all book fees would be overwritten. BEGIN and ROLLBACK would allow the transaction to be cancelled before the damage becomes permanent.
 
 **Question 5.3:** Autocommit is convenient for read-only queries (`SELECT`).
 Is it also safe for DML in an interactive session? Give a concrete example
 from this exercise where Autocommit would have caused irreversible data loss.
 
-> *Your answer:*
+> *Your answer:*  Autocommit is not safe for DML in interactive sessions. For example, deleting all loans accidentally without a WHERE clause would immediately and permanently remove all data if autocommit were enabled.
 
 Commit:
 
@@ -612,7 +623,7 @@ The lecture warns against using `TEXT` for everything. Looking at the
 it should be a more specific type, and what concrete query would break or
 produce wrong results if the wrong type were used?
 
-> *Your answer:*
+> *Your answer:*  The most tempting column to store as TEXT would be erscheinungsjahr. However, numeric comparisons such as WHERE erscheinungsjahr < 1960 would not work correctly if the values were stored as text.
 
 **Question B – DDL as documentation:**  
 A colleague reads your `schema.sql` and says: "Constraints slow down inserts
@@ -620,14 +631,14 @@ A colleague reads your `schema.sql` and says: "Constraints slow down inserts
 reasons why enforcing constraints in the database is preferable to
 enforcing them only in application code.
 
-> *Your answer:*
+> *Your answer:*  Constraints should be enforced in the database because they guarantee data integrity independently of the application. They also prevent inconsistent data when multiple applications access the same database.
 
 **Question C – NULL semantics in lending:**  
 In `ausleihe`, `rueckgabe_datum IS NULL` means "currently on loan". Could
 this semantic be expressed without using `NULL` — e.g. by using a status
 column instead? What are the trade-offs?
 
-> *Your answer:*
+> *Your answer:*  Yes, the semantics could also be represented with a status column such as 'open' or 'returned'. However, using NULL in rueckgabe_datum is simpler and avoids redundant data because the missing return date already indicates an open loan.
 
 **Question D – `TRUNCATE` vs. `DELETE`:**  
 If you wanted to reset the entire database and reload the sample data from
@@ -635,7 +646,7 @@ scratch, you would need to empty all four tables. Can you use `TRUNCATE`
 in SQLite? What alternative would you use, and in what order must the tables
 be emptied to respect foreign key constraints?
 
-> *Your answer:*
+> *Your answer:*  SQLite does not support TRUNCATE. Instead, DELETE FROM must be used. To respect foreign key constraints, tables should be emptied in dependency order: first ausleihe, then exemplar, then mitglied, and finally buch.
 
 > **Screenshot 4:** Take a screenshot showing the output of the row-count
 > verification from Task 3a after completing all DML tasks, with
