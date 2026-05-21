@@ -546,7 +546,8 @@ SELECT * FROM ausleihe WHERE ausleihe_id = 5;
 
 > **Screenshot 3:** Take a screenshot showing the inserted row.
 >
-> `[insert screenshot]`
+>  <img width="1212" height="146" alt="لقطة شاشة 2026-05-21 224018" src="https://github.com/user-attachments/assets/9e32f3d4-0a2f-476d-823f-40e380d21a28" />
+
 
 ### Task 5b – Simulate a Rollback
 
