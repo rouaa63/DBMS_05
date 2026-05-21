@@ -243,7 +243,8 @@ sqlite3 bibliothek.db ".schema"
 > **Screenshot 2:** Take a screenshot showing the `.tables` and `.schema`
 > output in your terminal.
 >
-> `[insert screenshot]`
+> <img width="870" height="850" alt="لقطة شاشة 2026-05-21 215810" src="https://github.com/user-attachments/assets/b13fabdf-95f7-47f6-a0fe-91125fe6acef" />
+
 
 ### Task 2c – Test Constraints
 
