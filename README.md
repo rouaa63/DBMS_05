@@ -270,9 +270,14 @@ INSERT INTO ausleihe VALUES (1, 1, 1, '2026-05-10', '2026-05-01');
 
 > *Describe the error or result for each test:*
 >
-> - Test A:
-> - Test B:
-> - Test C:
+> - Test A: The insert fails due to the CHECK constraint on tagesgebuehr.
+Since the value -1.50 is smaller than 0, the database rejects the row and raises a constraint violation error.
+
+> - Test B: The insert fails because the email column is declared NOT NULL.
+Since no email value is provided, SQLite rejects the insertion with a NOT NULL constraint violation.
+
+> - Test C: The insert into ausleihe fails because the CHECK constraint is violated.
+rueckgabe_datum ('2026-05-01') is earlier than ausleihe_datum ('2026-05-10'), which violates the rule that return date must be NULL or later than the loan date.
 
 ### Questions for Task 2
 
