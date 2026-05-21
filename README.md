@@ -641,7 +641,7 @@ be emptied to respect foreign key constraints?
 > verification from Task 3a after completing all DML tasks, with
 > `.headers on` and `.mode column` active.
 >
-> <img width="1920" height="1080" alt="لقطة شاشة 2026-05-21 215540" src="https://github.com/user-attachments/assets/d092fa6e-279c-48e3-a511-3f12fdc3bac6" />
+> <img width="1882" height="945" alt="image" src="https://github.com/user-attachments/assets/02754579-63aa-4ee0-a462-d54851c071e6" />
 
 
 ---
